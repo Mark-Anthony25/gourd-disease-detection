@@ -23,9 +23,10 @@ gourd-disease-detection/
 
 ### Major Improvements
 
-✅ **Added Online Data Augmentation**
-- RandomFlip, RandomRotation, RandomZoom, RandomContrast
-- Applied dynamically during training for better generalization
+✅ **Proper Augmentation Handling**
+- Dataset already includes comprehensive offline augmentation
+- Removed redundant online augmentation to avoid double augmentation
+- Uses pre-augmented dataset as intended by dataset creators
 
 ✅ **Explicit Normalization**
 - Added Rescaling layer (1./255.0) for consistent preprocessing
@@ -63,9 +64,10 @@ gourd-disease-detection/
    - Recommendations for validation with external data
    - Improved metrics beyond just accuracy
 
-2. **No Data Augmentation During Training**
-   - Implemented online augmentation pipeline
-   - More robust to variations in real-world data
+2. **Proper Data Augmentation Strategy**
+   - Recognized dataset already contains 22,825 pre-augmented images
+   - Removed redundant online augmentation to prevent double augmentation
+   - Uses pre-augmented dataset correctly (5x augmentation ratio already applied)
 
 3. **Missing Training Safeguards**
    - Added callbacks to prevent overfitting

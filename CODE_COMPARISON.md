@@ -4,28 +4,28 @@ This document provides side-by-side comparisons of key sections showing the impr
 
 ---
 
-## 1. Data Augmentation
+## 1. Data Augmentation Strategy
 
-### ❌ Original (Static Augmentation)
+### ❌ Original (Pre-Augmented Dataset Only)
 ```python
+# Original code used pre-augmented dataset without online augmentation
 # Augmented images were pre-generated and stored in a separate directory
-# No augmentation applied during training
 AUG = os.path.join(BASE, "Augmented Data")
 
-# Images just copied to training set
+# Images just copied to training set - no additional augmentation
 train_aug = [os.path.join(disease_aug, f) 
              for f in os.listdir(disease_aug) 
              if f.lower().endswith(('.jpg', '.png', '.jpeg'))]
 ```
 
-**Problem**: Static augmentation limits diversity. Same augmented images seen every epoch.
+**Approach**: Used 22,825 pre-augmented images (with rotation, shear, zoom, brightness, flip) alongside 4,568 raw images. No online augmentation during training.
 
-### ✅ Improved (Online Augmentation)
+### ✅ Improved (Correct Handling of Pre-Augmented Dataset)
 ```python
 def get_augmentation_model():
     """
-    Create data augmentation model using Keras Sequential API.
-    This is applied during training for better generalization.
+    Data augmentation model (available but NOT used on pre-augmented dataset).
+    The dataset already contains extensive offline augmentation.
     """
     return tf.keras.Sequential([
         layers.RandomFlip("horizontal_and_vertical"),
@@ -34,14 +34,19 @@ def get_augmentation_model():
         layers.RandomContrast(0.2),
     ], name="augmentation")
 
-# Applied dynamically during training
-if augment:
-    augmentation = get_augmentation_model()
-    ds = ds.map(lambda x, y: (augmentation(x, training=True), y), 
-               num_parallel_calls=AUTOTUNE)
+# Load pre-augmented dataset WITHOUT additional augmentation
+train_crop, CROP_NAMES = load_dataset(
+    os.path.join(WORKING_DIR, "train"), 
+    augment=False  # ← Disabled to avoid double augmentation
+)
 ```
 
-**Benefit**: Different augmentations every epoch = better generalization.
+**Benefit**: Correctly uses the pre-augmented dataset without redundant online augmentation. Avoids double augmentation that could create excessive distortion and hurt model performance.
+
+**Note**: The dataset already has comprehensive augmentation:
+- 4,568 raw images + 22,825 pre-augmented images = 27,393 total
+- Pre-augmentation includes: rotation, shear, zoom, brightness, horizontal flip
+- 5x augmentation ratio already applied by dataset creators
 
 ---
 
