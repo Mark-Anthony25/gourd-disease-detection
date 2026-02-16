@@ -21,14 +21,14 @@ This document outlines the comprehensive analysis, identified issues, and improv
   - Improved split verification
   - Added comprehensive metrics beyond accuracy
 
-#### 2. **No Online Data Augmentation**
-- **Problem**: Augmented images were only in the dataset directory, not applied during training
-- **Impact**: Limited model generalization to new images
-- **Solution**: Implemented online augmentation using `tf.keras.Sequential` with:
-  - RandomFlip (horizontal and vertical)
-  - RandomRotation (20%)
-  - RandomZoom (20%)
-  - RandomContrast (20%)
+#### 2. **Proper Augmentation Handling**
+- **Problem**: Dataset already contains extensive offline augmentation (22,825 augmented images)
+- **Original Issue**: Improved version incorrectly added online augmentation on top of pre-augmented data
+- **Impact**: Double augmentation caused excessive distortion and training instability
+- **Solution**: Removed online augmentation to use pre-augmented dataset as intended:
+  - Dataset includes rotation, shear, zoom, brightness, and horizontal flip
+  - 5x augmentation ratio already applied (4,568 raw → 27,393 total images)
+  - Online augmentation disabled (`augment=False`) to avoid redundancy
 
 #### 3. **Missing Explicit Normalization**
 - **Problem**: Relied on implicit ImageNet normalization
@@ -183,7 +183,7 @@ tf.random.set_seed(42)
 ### Before
 - **Metrics**: Accuracy only
 - **Callbacks**: None
-- **Augmentation**: Static (pre-generated)
+- **Augmentation**: Pre-augmented dataset only (static)
 - **Normalization**: Implicit
 - **Class Weights**: None
 - **Code Duplication**: High
@@ -192,7 +192,7 @@ tf.random.set_seed(42)
 ### After
 - **Metrics**: Accuracy, Precision, Recall, F1-Score
 - **Callbacks**: EarlyStopping, ReduceLROnPlateau, ModelCheckpoint
-- **Augmentation**: Online (dynamic during training)
+- **Augmentation**: Pre-augmented dataset used correctly (no double augmentation)
 - **Normalization**: Explicit (Rescaling layer)
 - **Class Weights**: Automatic computation
 - **Code Duplication**: None
