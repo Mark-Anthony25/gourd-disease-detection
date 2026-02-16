@@ -111,7 +111,7 @@ Dense(128) → Dropout(0.5) → Output
 
 #### 2. **Enhanced Training Pipeline**
 - Increased batch size from 16 to 32 for better stability
-- Reduced crop model epochs from 28 to 30 with early stopping
+- Set crop model to 30 epochs with early stopping (original: 8 tuning + 20 final = 28)
 - Increased disease model epochs from 12 to 20 with early stopping
 - Added proper validation and monitoring
 
